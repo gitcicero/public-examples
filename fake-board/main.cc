@@ -1,7 +1,7 @@
 //
-// A Makefile is an unnecessary complication.
+// Instead of using make(1), the progam can be manually compiled.
 //
-// On macOS I built and ran using:
+// On macOS, build and run using:
 //
 // c++ -std=c++11 -c -o Board.o Board.cc && c++ -std=c++11 -o main main.cc Board.o && ./main
 //
