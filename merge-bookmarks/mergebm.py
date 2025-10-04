@@ -565,12 +565,12 @@ class Folder(Element):
         class constructor.
         """
 
-        self._folder = folder
-        self._id = id
-
         super().__init__(source=source,
                          parent_path=parent_path,
                          nesting_depth=nesting_depth)
+
+        self._folder = folder
+        self._id = id
 
     @property
     def folder(self):
@@ -658,12 +658,12 @@ class Anchor(Element):
         class constructor.
         """
 
-        self._href = href
-        self._anchor_text = anchor_text
-
         super().__init__(source=source,
                          parent_path=parent_path,
                          nesting_depth=nesting_depth)
+
+        self._href = href
+        self._anchor_text = anchor_text
 
     @property
     def href(self):
@@ -1728,8 +1728,8 @@ class BookmarksParser(HTMLParser):
         bookmarks - an instance of a Bookmarks class.
         """
 
+        super().__init__(convert_charrefs=context._args.convert)
         self._args = context._args
-        super().__init__(convert_charrefs=self._args.convert)
         self._file = file
         self._source = source
 
