@@ -267,10 +267,10 @@ Board::initialize()
 						   version_b_)));
 
     int err = 0;
-    for (auto device = devices_.begin(); device != devices_.end(); ++device) {
-	err = (*device)->initialize();
+    for (auto& device : devices_) {
+	err = device->initialize();
         if (err != 0) {
-	    std::cout << (*device)->name() << " initialization failed\n";
+	    std::cout << device->name() << " initialization failed\n";
 	    break;
         }
     }
