@@ -3,35 +3,40 @@
 //
 // On macOS, build and run using:
 //
-// c++ -std=c++11 -c -o Board.o Board.cc && c++ -std=c++11 -o main main.cc Board.o && ./main
+// c++ -std=c++17 -c -o Board.o Board.cc && c++ -std=c++17 -o main main.cc Board.o && ./main
+//
+// Or, consult the Makefile.
 //
 
 // Instead of using something like CxxTest, just use assert().
 #include <cassert>
 
 #include <cerrno>
-#include <cstring>
 #include <iostream>
 #include <memory>
+#include <string_view>
 
 #include "Board.h"
 
 namespace {
-    const uint32_t ROM_ID = 0U;
+    constexpr uint32_t ROM_ID = 0U;
 
-    const uint32_t BETA_ID = 1U;
-    const uint32_t BETA_VERSION = 3U;
+    constexpr uint32_t BETA_ID = 1U;
+    constexpr uint32_t BETA_VERSION = 3U;
+
+    // This is for unit tests.
+    constexpr uint32_t BASE_INVALID_ID = 11U;
 }
 
 void test_good_init()
 {
-    std::string label("good_init");
+    constexpr std::string_view label{ "good_init" };
 
     std::cout << "Test " << label << "...\n";
 
     std::unique_ptr<Board> board(new Board(BETA_VERSION));
 
-    const int err = board->initialize();
+    const auto err = board->initialize();
     assert(err == 0);
 
     std::cout << label << " PASSED\n\n";
@@ -39,13 +44,13 @@ void test_good_init()
 
 void test_bad_init()
 {
-    const std::string label("bad_init");
+    constexpr std::string_view label{ "bad_init" };
 
     std::cout << "Test " << label << "...\n";
 
-    std::unique_ptr<Board> board(new Board(12));
+    std::unique_ptr<Board> board(new Board(BASE_INVALID_ID + 1));
 
-    const int err = board->initialize();
+    const auto err = board->initialize();
 
     assert(err == ENXIO);
     std::cout << label << " initialization failed: " << std::strerror(err)
@@ -56,13 +61,13 @@ void test_bad_init()
 
 void test_happy_paths()
 {
-    const std::string label("happy_paths");
+    constexpr std::string_view label { "happy_paths" };
 
     std::cout << "Test " << label << "...\n";
 
     std::unique_ptr<Board> board(new Board(BETA_VERSION));
 
-    int err = board->initialize();
+    auto err = board->initialize();
     assert(err == 0);
 
     uint64_t value;
@@ -95,16 +100,16 @@ void test_happy_paths()
 
 void test_put_readonly()
 {
-    const std::string label("put_readonly");
+    constexpr std::string_view label{ "put_readonly" };
 
     std::cout << "Test " << label << "...\n";
 
     std::unique_ptr<Board> board(new Board(BETA_VERSION));
 
-    int err = board->initialize();
+    auto err = board->initialize();
     assert(err == 0);
 
-    std::string rom_name;
+    std::string_view rom_name;
     err = board->device_name(ROM_ID, rom_name);
     assert(err == 0);
 
@@ -124,19 +129,20 @@ void test_put_readonly()
 	      << std::strerror(err) << "\n";
 
     //
-    // Simple and fine place for an invalid device tests.  Less
-    // chatter and only emit one message.
+    // Simple and fine place for invalid device tests. Less chatter
+    // and only emit one message.
     //
     uint64_t value;
-    std::string name;
+    std::string_view name;
+    constexpr auto invalid_id { BASE_INVALID_ID + 11 };
 
-    err = board->device_name(11, name);
+    err = board->device_name(invalid_id, name);
     assert(err == ENODEV);
-    err = board->device_size(12, &size);
+    err = board->device_size(invalid_id + 1, &size);
     assert(err == ENODEV);
-    err = board->device_get(13, 1, &value);
+    err = board->device_get(invalid_id + 2, 1, &value);
     assert(err == ENODEV);
-    err = board->device_put(14, 1, 456);
+    err = board->device_put(invalid_id + 3, 1, 456);
     assert(err == ENODEV);
     std::cout << label << " " << rom_name << " put failed: "
 	      << std::strerror(err) << "\n";
@@ -146,25 +152,25 @@ void test_put_readonly()
 
 void test_read_mem_errors()
 {
-    const std::string label("read_mem_errors");
+    constexpr std::string_view label{ "read_mem_errors" };
 
     std::cout << "Test " << label << "...\n";
 
     std::unique_ptr<Board> board(new Board(BETA_VERSION));
 
-    int err = board->initialize();
+    auto err = board->initialize();
     assert(err == 0);
 
     size_t size;
     err = board->device_size(BETA_ID, &size);
     assert(err == 0);
 
-    std::string beta_name;
+    std::string_view beta_name;
     err = board->device_name(BETA_ID, beta_name);
     assert(err == 0);
 
     uint64_t value;
-    err = board->device_get(6, size + 8, &value);
+    err = board->device_get(BASE_INVALID_ID, size + 8, &value);
     assert(err == ENODEV);
     std::cout << label << " " <<  beta_name << " get failed: "
 	      << std::strerror(err) << "\n";
@@ -179,25 +185,25 @@ void test_read_mem_errors()
 
 void test_write_mem_errors()
 {
-    const std::string label("write_mem_errors");
+    constexpr std::string_view label{ "write_mem_errors" };
 
     std::cout << "Test " << label << "...\n";
 
     std::unique_ptr<Board> board(new Board(BETA_VERSION));
 
-    int err = board->initialize();
+    auto err = board->initialize();
     assert(err == 0);
 
     size_t size;
     err = board->device_size(BETA_ID, &size);
     assert(err == 0);
 
-    std::string beta_name;
+    std::string_view beta_name;
     err = board->device_name(BETA_ID, beta_name);
     assert(err == 0);
 
     uint64_t value = 0xcafe;
-    err = board->device_put(6, size + 8, value);
+    err = board->device_put(BASE_INVALID_ID, size + 8, value);
     assert(err == ENODEV);
     std::cout << label << " " <<  beta_name << " put failed: "
 	      << std::strerror(err) << "\n";
@@ -210,7 +216,7 @@ void test_write_mem_errors()
     std::cout << label << " PASSED\n\n";
 }
 
-int main(int argc, char **argv)
+int main(__attribute__((unused))int argc, __attribute__((unused))char **argv)
 {
     test_good_init();
     test_bad_init();

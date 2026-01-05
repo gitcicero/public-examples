@@ -2,7 +2,9 @@ TARGET = main
 
 OBJS = Board.o main.o
 
-CXXFLAGS = -std=c++11
+CPLUSPLUS_VERSION = -std=c++17
+WARN_FLAGS = -Werror -Wall -Wextra
+CXXFLAGS = $(CPLUSPLUS_VERSION) $(WARN_FLAGS)
 
 all: $(TARGET)
 

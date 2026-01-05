@@ -1,7 +1,6 @@
 #include <cerrno>
-#include <cstdlib>
-#include <cstring>
 #include <iostream>
+#include <string_view>
 
 #include "Board.h"
 
@@ -12,8 +11,8 @@
 //    point is cleaner. It's less relevant when object destruction
 //    will release resources when an object goes out of scope. For
 //    resources not wrapped by a class, for example a raw file
-//    descriptor, like a pthread_mutex_t, etc., it is better to also
-//    have a single point where resources are released. The "goto out"
+//    descriptor, a pthread_mutex_t, etc., it is better to also have a
+//    single point where resources are released. The "goto out"
 //    pattern is also future proof. If a variable does contain a
 //    resource needing explicit releasing, then there is no need to
 //    track down all of the "return" statements and update the code
@@ -24,10 +23,8 @@
 //    errors. Using EINVAL for everything doesn't make for a good
 //    demo.
 //
-// 3. There are likely more C++11 specific features that could be
-//    used, but I'm not sufficiently aware at this time. I'm not sure
-//    whether "auto" function returns are good style, so I didn't even
-//    try to use them anywhere.
+// 3. There are likely more modern C++XX specific features that could
+//    be used, but I'm not sufficiently aware at this time.
 //
 // 4. The output messages exist purely for the purpose of the
 //    demo. These could be log messages in some real
@@ -44,25 +41,25 @@
 class RomConfig : public Device
 {
   public:
-    RomConfig(const std::string& name);
+    RomConfig(const std::string_view name);
     virtual ~RomConfig() = default;
 
-    virtual const std::string& name() const;
-    virtual int initialize();
+    const std::string_view name() const override;
+    int initialize() override;
 
-    virtual size_t size() const;
-    virtual int read(uint32_t offset, uint64_t *valp) const;
-    virtual int write(uint32_t offset, const uint64_t val);
+    size_t size() const override;
+    int read(size_t offset, uint64_t *valp) const override;
+    int write(size_t offset, const uint64_t val) override;
 
   private:
     const std::string name_;
 
-    static const size_t MEM_SIZE_ = 5;
+    static constexpr size_t MEM_SIZE_ = 5;
     uint64_t memory_[MEM_SIZE_];
 };
 
-RomConfig::RomConfig(const std::string& name)
-    : name_(name)
+RomConfig::RomConfig(const std::string_view name)
+    : name_{ name }
 {
     //
     // The ctor wouldn't touch the hardware ... but we need to have a
@@ -81,7 +78,7 @@ RomConfig::initialize()
     return 0;
 }
 
-const std::string&
+const std::string_view
 RomConfig::name() const
 {
     return name_;
@@ -98,9 +95,9 @@ RomConfig::size() const
 // error.
 //
 int
-RomConfig::read(uint32_t offset, uint64_t *valp) const
+RomConfig::read(size_t offset, uint64_t *valp) const
 {
-    int err = 0;
+    auto err = 0;
 
     if (offset >= MEM_SIZE_) {
 	err = EINVAL;
@@ -115,9 +112,9 @@ out:
 }
 
 int
-RomConfig::write(uint32_t offset, uint64_t val)
+RomConfig::write(size_t offset, __attribute__((unused))uint64_t val)
 {
-    int err = 0;
+    auto err = 0;
 
     if (offset >= MEM_SIZE_) {
 	err = EINVAL;
@@ -137,27 +134,27 @@ out:
 class Store : public Device
 {
   public:
-    Store(const std::string& name, int version);
+    Store(const std::string_view name, int version);
     virtual ~Store() = default;
 
-    virtual const std::string& name() const;
-    virtual int initialize();
+    const std::string_view name() const override;
+    int initialize() override;
 
-    virtual size_t size() const;
-    virtual int read(uint32_t offset, uint64_t *valp) const;
-    virtual int write(uint32_t offset, uint64_t val);
+    size_t size() const override;
+    int read(size_t offset, uint64_t *valp) const override;
+    int write(size_t offset, uint64_t val) override;
 
   private:
     const std::string name_;
     const int version_;
 
-    static const size_t MEM_SIZE_ = 10;
+    static constexpr size_t MEM_SIZE_ = 10;
     uint64_t memory_[MEM_SIZE_];
 };
 
-Store::Store(const std::string& name, int version)
-    : name_(name + "." + std::to_string(version)),
-      version_(version)
+Store::Store(const std::string_view name, int version)
+    : name_{ std::string{ name } + "." + std::to_string(version) },
+      version_{ version }
 {
     //
     // The ctor wouldn't touch the hardware and error checks are
@@ -165,7 +162,7 @@ Store::Store(const std::string& name, int version)
     //
 }
 
-const std::string&
+const std::string_view
 Store::name() const
 {
     return name_;
@@ -174,7 +171,7 @@ Store::name() const
 int
 Store::initialize()
 {
-    int err = 0;
+    auto err = 0;
 
     std::cout << "Initializing " << name_ << "...\n";
 
@@ -203,7 +200,7 @@ Store::size() const
 // error.
 //
 int
-Store::read(uint32_t offset, uint64_t *valp) const
+Store::read(size_t offset, uint64_t *valp) const
 {
     int err = 0;
 
@@ -220,7 +217,7 @@ out:
 }
 
 int
-Store::write(uint32_t offset, uint64_t val)
+Store::write(size_t offset, uint64_t val)
 {
     int err = 0;
 
@@ -279,7 +276,7 @@ Board::initialize()
 }
 
 int
-Board::device_name(uint32_t id, std::string& name) const
+Board::device_name(uint32_t id, std::string_view& name) const
 {
     int err = 0;
 
@@ -313,7 +310,7 @@ out:
 }
 
 int
-Board::device_get(uint32_t id, uint32_t offset, uint64_t *valp) const
+Board::device_get(uint32_t id, size_t offset, uint64_t *valp) const
 {
     int err = 0;
 
@@ -330,7 +327,7 @@ out:
 }
 
 int
-Board::device_put(uint32_t id, uint32_t offset, uint64_t val)
+Board::device_put(uint32_t id, size_t offset, uint64_t val)
 {
     int err = 0;
 
