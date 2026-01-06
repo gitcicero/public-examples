@@ -1,5 +1,6 @@
 #include "DeviceAPI.h"
 
+#include <memory>
 #include <vector>
 
 class Board {
