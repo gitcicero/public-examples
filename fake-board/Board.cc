@@ -42,7 +42,7 @@ class RomConfig : public Device
 {
   public:
     RomConfig(const std::string_view name);
-    virtual ~RomConfig() = default;
+    ~RomConfig() override = default;
 
     const std::string_view name() const override;
     int initialize() override;
@@ -135,7 +135,7 @@ class Store : public Device
 {
   public:
     Store(const std::string_view name, int version);
-    virtual ~Store() = default;
+    ~Store() override = default;
 
     const std::string_view name() const override;
     int initialize() override;

@@ -28,7 +28,7 @@ namespace {
     constexpr uint32_t BASE_INVALID_ID = 11U;
 }
 
-void test_good_init()
+static void test_good_init()
 {
     constexpr std::string_view label{ "good_init" };
 
@@ -42,7 +42,7 @@ void test_good_init()
     std::cout << label << " PASSED\n\n";
 }
 
-void test_bad_init()
+static void test_bad_init()
 {
     constexpr std::string_view label{ "bad_init" };
 
@@ -59,7 +59,7 @@ void test_bad_init()
     std::cout << label << " PASSED\n\n";
 }
 
-void test_happy_paths()
+static void test_happy_paths()
 {
     constexpr std::string_view label { "happy_paths" };
 
@@ -98,7 +98,7 @@ void test_happy_paths()
     std::cout << label << " PASSED\n\n";
 }
 
-void test_put_readonly()
+static void test_put_readonly()
 {
     constexpr std::string_view label{ "put_readonly" };
 
@@ -150,7 +150,7 @@ void test_put_readonly()
     std::cout << label << " PASSED\n\n";
 }
 
-void test_read_mem_errors()
+static void test_read_mem_errors()
 {
     constexpr std::string_view label{ "read_mem_errors" };
 
@@ -183,7 +183,7 @@ void test_read_mem_errors()
     std::cout << label << " PASSED\n\n";
 }
 
-void test_write_mem_errors()
+static void test_write_mem_errors()
 {
     constexpr std::string_view label{ "write_mem_errors" };
 
