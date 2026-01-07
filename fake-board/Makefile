@@ -2,7 +2,7 @@ TARGET = main
 
 OBJS = Board.o main.o
 
-CPLUSPLUS_VERSION ?= -std=c++17
+CPLUSPLUS_VERSION ?= -std=c++20
 
 ifeq ($(strip $(WARN_EVERYTHING)),)
 WARN_FLAGS = -Werror -Wall -Wextra

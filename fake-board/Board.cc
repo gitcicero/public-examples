@@ -1,5 +1,6 @@
 #include <cerrno>
 #include <cstring>
+#include <format>
 #include <iostream>
 #include <string_view>
 
@@ -74,7 +75,9 @@ RomConfig::RomConfig(const std::string_view name)
 int
 RomConfig::initialize()
 {
-    std::cout << "Initializing device " << name_ << "...\n";
+    std::ostream_iterator<char> out(std::cout);
+    
+    std::format_to(out, "Initializing device {}...\n", name_);
 
     return 0;
 }
@@ -173,8 +176,9 @@ int
 Store::initialize()
 {
     auto err = 0;
-
-    std::cout << "Initializing " << name_ << "...\n";
+    std::ostream_iterator<char> out(std::cout);
+    
+    std::format_to(out, "Initializing {}...\n", name_);
 
     // Handle deferred error checking.
     if (version_ > 3) {
@@ -252,7 +256,9 @@ Board::Board(int version_b)
 int
 Board::initialize()
 {
-    std::cout << "Initializing board...\n";
+    std::ostream_iterator<char> out(std::cout);
+    
+    std::format_to(out, "Initializing board...\n");
 
     //
     // A specific board knows which devices are present.
@@ -268,8 +274,8 @@ Board::initialize()
     for (auto& device : devices_) {
 	err = device->initialize();
         if (err != 0) {
-	    std::cout << device->name() << " initialization failed\n";
-	    break;
+            std::format_to(out, "{} initialization failed\n", device->name());
+            break;
         }
     }
 
@@ -282,8 +288,8 @@ Board::device_name(uint32_t id, std::string_view& name) const
     int err = 0;
 
     if (id > count_) {
-	err = ENODEV;
-	goto out;
+        err = ENODEV;
+        goto out;
     }
 
     name = devices_[id]->name();
@@ -299,8 +305,8 @@ Board::device_size(uint32_t id, size_t *sizep) const
     int err = 0;
 
     if (id > count_) {
-	err = ENODEV;
-	goto out;
+        err = ENODEV;
+        goto out;
     }
 
     *sizep = devices_[id]->size();
@@ -316,8 +322,8 @@ Board::device_get(uint32_t id, size_t offset, uint64_t *valp) const
     int err = 0;
 
     if (id > count_) {
-	err = ENODEV;
-	goto out;
+        err = ENODEV;
+        goto out;
     }
 
     err = devices_[id]->read(offset, valp);
@@ -333,8 +339,8 @@ Board::device_put(uint32_t id, size_t offset, uint64_t val)
     int err = 0;
 
     if (id > count_) {
-	err = ENODEV;
-	goto out;
+        err = ENODEV;
+        goto out;
     }
 
     err = devices_[id]->write(offset, val);
