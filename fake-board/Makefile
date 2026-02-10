@@ -1,5 +1,7 @@
 TARGET = main
 
+HEADERS = Board.h DeviceAPI.h
+
 OBJS = Board.o main.o
 
 CPLUSPLUS_VERSION ?= -std=c++20
@@ -18,7 +20,7 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CXX) $^ -o $@
 
-%.o: %.cc
+%.o: %.cc $(HEADERS)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
